@@ -1,19 +1,19 @@
-from pathlib import Path
-import duckdb
-
 from src.utils.logger import get_logger
+from src.database.connection import get_connection
 
 logger = get_logger(__name__)
-DB_PATH = Path("data/pokemon.duckdb")
 
 
 def main():
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    logger.info("Initializing Database... ")
+    try:
+        with get_connection():
+            pass
+    except RuntimeError as e:
+        logger.error(str(e))
+        raise
 
-    conn = duckdb.connect(str(DB_PATH))
-    conn.close()
-
-    logger.info(f"Database created at {DB_PATH.resolve()}")
+    logger.info("Database initialized")
 
 
 if __name__ == "__main__":
