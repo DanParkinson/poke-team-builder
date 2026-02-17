@@ -1,7 +1,8 @@
 from src.utils.logger import get_logger
 from src.database.connection import get_connection
 from src.database.migrate import apply_schema
-from src.database.schema import SCHEMA_SQL
+from src.database.validation import validate_schema
+from src.database.schema import SCHEMA_SQL, EXPECTED_TABLES
 
 logger = get_logger(__name__)
 
@@ -11,9 +12,7 @@ def main():
     try:
         with get_connection() as conn:
             apply_schema(conn, SCHEMA_SQL)
-            tables = [t[0] for t in conn.execute("SHOW TABLES").fetchall()]
-
-        logger.info(f"schema applied. TABLES: {tables}")
+            validate_schema(conn, EXPECTED_TABLES)
     except RuntimeError as e:
         logger.error(str(e))
         raise

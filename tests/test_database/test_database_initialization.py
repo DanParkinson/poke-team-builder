@@ -1,8 +1,10 @@
 import duckdb
 
+
 from src.database.connection import get_connection
 from src.database.migrate import apply_schema, rebuild_schema
-from src.database.schema import SCHEMA_SQL
+from src.database.validation import validate_schema
+from src.database.schema import SCHEMA_SQL, EXPECTED_TABLES
 
 
 def test_get_connection_returns_valid_connection():
@@ -18,7 +20,7 @@ def test_get_connection_returns_valid_connection():
 def test_schema_creates_tables(tmp_path):
     # Arrange
     db_path = tmp_path / "test.duckdb"
-    expected = {"pokemon", "pokemon_stats", "pokemon_types", "type_chart"}
+    expected = EXPECTED_TABLES
     conn = duckdb.connect(str(db_path))
 
     # Act
@@ -67,3 +69,31 @@ def test_rebuild_schema_drops_existing_tables(tmp_path):
 
     # Assert
     assert count == 0
+
+
+def test_validate_schema_passes_for_valid_schema(tmp_path):
+    # Arrange
+    db_path = tmp_path / "test.duckdb"
+    conn = duckdb.connect(str(db_path))
+    apply_schema(conn, SCHEMA_SQL)
+
+    # Act / Assert
+    validate_schema(conn, EXPECTED_TABLES)
+    conn.close()
+
+
+def test_validate_schema_fails_if_table_missing(tmp_path):
+    # Arrange
+    db_path = tmp_path / "test.duckdb"
+    conn = duckdb.connect(str(db_path))
+
+    # Act
+    try:
+        validate_schema(conn, EXPECTED_TABLES)
+        assert False, "Validation should fail when tables are missing"
+    except RuntimeError:
+        pass
+
+    conn.close()
+
+    # Assert

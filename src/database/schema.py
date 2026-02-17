@@ -1,3 +1,10 @@
+EXPECTED_TABLES = {
+    "pokemon",
+    "pokemon_stats",
+    "pokemon_types",
+    "type_chart",
+}
+
 SCHEMA_SQL = """
 CREATE TABLE IF NOT EXISTS pokemon (
     id INTEGER PRIMARY KEY,
@@ -7,7 +14,7 @@ CREATE TABLE IF NOT EXISTS pokemon (
     weight INTEGER
 );
 
-CREATE tABLE IF NOT EXISTS pokemon_stats (
+CREATE TABLE IF NOT EXISTS pokemon_stats (
     pokemon_id INTEGER PRIMARY KEY,
     hp INTEGER NOT NULL,
     attack INTEGER NOT NULL,
