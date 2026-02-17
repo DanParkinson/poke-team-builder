@@ -32,3 +32,10 @@ CREATE TABLE IF NOT EXISTS type_chart (
     PRIMARY KEY (attacking_type, defending_type)
 );
 """
+
+DROP_SQL = """
+DROP TABLE IF EXISTS type_chart;
+DROP TABLE IF EXISTS pokemon_types;
+DROP TABLE IF EXISTS pokemon_stats;
+DROP TABLE IF EXISTS pokemon;
+"""
