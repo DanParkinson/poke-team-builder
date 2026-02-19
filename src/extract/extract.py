@@ -1,5 +1,6 @@
-import requests
-
+from src.extract.http import fetch_json
+from src.extract.urls import parse_pokeapi_url
+from src.extract.listings import fetch_resource_page, extract_results_urls
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -11,36 +12,21 @@ def extract_pokemon(resource: str) -> None:
     """
     Fetch a pokemon data from the api as JSON.
     """
+    logger.info("Beginning extraction of Pokemon data...")
     page = fetch_resource_page(resource)
     urls = extract_results_urls(page)
-    print(urls)
+    for url in urls:
+        resource, resource_id = parse_pokeapi_url(url)
+        data = fetch_json(url)
+        print(
+            resource_id,
+            data["name"],
+            data["height"],
+            data["weight"],
+            data["base_experience"],
+        )
 
-
-def extract_results_urls(page_json: dict) -> list[str]:
-    results = page_json.get("results", [])
-    return [item["url"] for item in results if "url" in item]
-
-
-def fetch_resource_page(resource: str) -> dict:
-    url = resource_url(resource)
-    return fetch_json(url)
-
-
-def resource_url(resource: str) -> str:
-    """Build a resource URL"""
-    return f"{BASE_URL}/{resource}"
-
-
-def fetch_json(url: str, timeout: float = 5.0) -> dict:
-    """
-    Fetches JSON DATA FROM API
-    """
-    try:
-        response = requests.get(url, timeout=timeout)
-        response.raise_for_status()
-        return response.json()
-    except Exception as e:
-        logger.error(f"Failed to fetch {url}: {e}")
+    logger.info("pokemon data successfully extracted.")
 
 
 if __name__ == "__main__":
