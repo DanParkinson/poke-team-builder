@@ -7,23 +7,22 @@ def fetch_resource_page(resource: str, resource_id: int | None = None) -> dict:
     return fetch_json(url)
 
 
-def extract_results_urls(page_json: dict) -> list[str]:
-    if "results" not in page_json:
-        raise ValueError("Listing extraction failed: missing 'results' field")
+def parse_page(page: dict) -> dict:
+    results = [
+        {
+            "name": item["name"],
+            "url": item["url"],
+        }
+        for item in page["results"]
+    ]
 
-    results = page_json["results"]
+    next_url = page.get("next")
 
-    if not isinstance(results, list):
-        raise ValueError("Listing extraction failed: 'results' must be a list")
+    return {
+        "results": results,
+        "next": next_url,
+    }
 
-    urls = []
 
-    for i, item in enumerate(results):
-        if "url" not in item:
-            raise ValueError(
-                f"Listing extraction failed: missing 'url' in results[{i}]"
-            )
-
-        urls.append(item["url"])
-
-    return urls
+def extract_parsed_results_urls(results: list[dict]) -> list[str]:
+    pass

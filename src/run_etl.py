@@ -7,13 +7,13 @@ from src.load.pokemon import load_batch_pokemon
 logger = get_logger(__name__)
 
 
-def run_etl(resource: str, pokemon_id: int | None = None) -> None:
+def run_etl(resource: str, resource_id: int | None = None) -> None:
     """
     Main function for running ETL
     """
     logger.info("Beginning ETL Pipeline...")
 
-    raw_pokemon = extract_resource(resource, pokemon_id)
+    raw_pokemon = extract_resource(resource, resource_id)
     transformed_pokemon = transform_batch_pokemon(raw_pokemon)
     load_batch_pokemon(transformed_pokemon)
 
@@ -21,4 +21,4 @@ def run_etl(resource: str, pokemon_id: int | None = None) -> None:
 
 
 if __name__ == "__main__":
-    run_etl("pokemon", 1)
+    run_etl("pokemon")
