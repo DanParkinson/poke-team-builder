@@ -5,14 +5,21 @@ from src.contracts.contracts import REQUIRED_FIELDS_POKEMON
 logger = get_logger(__name__)
 
 
-def load_pokemon_batch(rows: dict) -> None:
+def load_batch_pokemon(rows: dict) -> None:
     logger.info("Loading Pokemon into DataBase...")
+    inserted_count = 0
+    skipped_count = 0
     for row in rows:
-        load_pokemon_row(row)
-    logger.info("Pokemon table Loaded.")
+        if load_pokemon_row(row):
+            inserted_count += 1
+        else:
+            skipped_count += 1
+    logger.info(
+        f"Pokemon table loaded. inserted={inserted_count}, skipped={skipped_count}"
+    )
 
 
-def load_pokemon_row(row: dict) -> None:
+def load_pokemon_row(row: dict) -> bool:
     """
     Insert transformed pokemon data into DuckDB pokemon table
     """
@@ -25,7 +32,7 @@ def load_pokemon_row(row: dict) -> None:
 
     try:
         conn.execute("BEGIN")
-        conn.execute(
+        result = conn.execute(
             """
             INSERT INTO pokemon (id, name, base_experience, height, weight)
             VALUES(?, ?, ?, ?, ?)
@@ -40,6 +47,13 @@ def load_pokemon_row(row: dict) -> None:
             ],
         )
         conn.execute("COMMIT")
+        inserted = result.rowcount == 1
+
+        if inserted:
+            logger.debug(f"Inserted pokemon id={row['id']}")
+        else:
+            logger.debug(f"Skipped pokemon id={row['id']} (already exists)")
+
     except Exception:
         conn.execute("ROLLBACK")
         raise

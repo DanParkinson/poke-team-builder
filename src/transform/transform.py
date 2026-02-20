@@ -4,7 +4,7 @@ from src.contracts.contracts import REQUIRED_FIELDS_POKEMON
 logger = get_logger(__name__)
 
 
-def transform_pokemon_batch(raw_pokemon: list[dict]) -> list[dict]:
+def transform_batch_pokemon(raw_pokemon: list[dict]) -> list[dict]:
     logger.info(f"Transforming {len(raw_pokemon)} pokemon...")
     return [transform_pokemon(p) for p in raw_pokemon]
 

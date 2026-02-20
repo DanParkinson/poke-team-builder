@@ -2,8 +2,8 @@ from src.extract.http import fetch_json
 from src.extract.urls import resource_url
 
 
-def fetch_resource_page(resource: str) -> dict:
-    url = resource_url(resource)
+def fetch_resource_page(resource: str, resource_id: int | None = None) -> dict:
+    url = resource_url(resource, resource_id)
     return fetch_json(url)
 
 
