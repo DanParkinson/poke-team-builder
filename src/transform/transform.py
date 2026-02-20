@@ -1,14 +1,7 @@
 from src.utils.logger import get_logger
+from src.contracts.contracts import REQUIRED_FIELDS_POKEMON
 
 logger = get_logger(__name__)
-
-REQUIRED_FIELDS = [
-    "id",
-    "name",
-    "weight",
-    "height",
-    "base_experience",
-]
 
 
 def transform_pokemon_batch(raw_pokemon: list[dict]) -> list[dict]:
@@ -22,7 +15,7 @@ def transform_pokemon(data: dict) -> dict:
 
     logger.debug(f"Transforming pokemon id={pokemon_id}")
 
-    for field in REQUIRED_FIELDS:
+    for field in REQUIRED_FIELDS_POKEMON:
         if field not in data:
             raise ValueError(
                 f"Pokemon transform failed for id={pokemon_id}, name='{pokemon_name}': "

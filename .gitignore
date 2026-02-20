@@ -24,3 +24,6 @@ data/*.duckdb
 # OS
 .DS_Store
 Thumbs.db
+
+# notebooks
+notebooks/ *.ipynb

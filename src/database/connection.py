@@ -1,7 +1,8 @@
 from pathlib import Path
 import duckdb
 
-DB_PATH = Path("data/pokemon.duckdb")
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DB_PATH = PROJECT_ROOT / "data" / "pokemon.duckdb"
 
 
 def get_connection() -> duckdb.DuckDBPyConnection:
