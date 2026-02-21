@@ -1,5 +1,5 @@
-from src.extract.http import fetch_json
 from src.extract.listings import fetch_resource_page, parse_page
+from src.extract.http import fetch_json, fetch_json_batch
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -7,16 +7,43 @@ logger = get_logger(__name__)
 
 def extract_resource(resource: str, resource_id: int | None = None) -> list[dict]:
     """
-    Fetch data from the api as JSON.
+    Fetch JSON fromm the api
+
+    Applied:
+        - Single page extraction
+        - Batch extraction
+
+    Returns:
+        A list of dictionaries of json data from specific resources.
+        - Single: [{url1 data}]
+        - Batch: [{url1 data, url2 data, url3 data, ...}]
     """
     if resource_id is not None:
-        logger.info(f"Beginning single extraction of {resource} id={resource_id}...")
-        return [fetch_resource_page(resource, resource_id)]
+        return extract_resource_single(resource, resource_id)
+    else:
+        urls = extract_resource_urls(resource)
+        return fetch_json_batch(urls, resource)
 
-    logger.info(f"Beginning batch extraction of {resource} data...")
+
+def extract_resource_single(resource: str, resource_id: int) -> list[dict]:
+    logger.info(f"Beginning single extraction of {resource} id={resource_id}...")
+    return [fetch_resource_page(resource, resource_id)]
+
+
+def extract_resource_urls(resource: str) -> list[dict]:
+    """
+    Fetches the initial resource page and goes through pages till end extracting all urls for resource.
+
+    Initializes:
+        - Total: count from the api to track progress
+
+    Returns:
+        - List of dict of urls
+        e.g. [{'url1', 'url2', ...}]
+    """
+    logger.info(f"Beginning batch extraction of {resource} urls...")
 
     page = fetch_resource_page(resource)
-    parsed = parse_page(page)
     total = page.get("count", None)
     urls: list[str] = []
 
@@ -25,26 +52,23 @@ def extract_resource(resource: str, resource_id: int | None = None) -> list[dict
         parsed = parse_page(page)
         urls.extend([item["url"] for item in parsed["results"]])
 
-        if total is not None:
-            logger.info(f"collected {len(urls)} / {total} {resource}")
-        else:
-            logger.info(f"collected {len(urls)} {resource}")
-        next_url = parsed["next"]
+        log_progress(resource, collected=len(urls), total=total)
 
+        next_url = parsed["next"]
         if next_url is None:
             break
         page = fetch_json(next_url)
 
-    logger.info(f"Collected {len(urls)} detail URLs. Fetching detail JSON...")
-    details: list[dict] = []
-    total_details = len(urls)
+    return urls
 
-    for i, url in enumerate(urls, start=1):
-        # fetch json from each url
-        details.append(fetch_json(url))
 
-        if i % 20 == 0 or i == total_details:
-            logger.info(f"Fetched detail {i}/{total_details} {resource}")
+# ==============
+# Helpers
+# ==============
 
-    logger.info(f"Completed extraction of {total_details} {resource} details.")
-    return details
+
+def log_progress(resource: str, collected: int, total: int | None = None) -> None:
+    if total is not None:
+        logger.info(f"collected {collected} / {total} {resource}")
+    else:
+        logger.info(f"collected {collected} {resource}")
