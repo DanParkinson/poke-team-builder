@@ -54,6 +54,8 @@ def load_pokemon_row(row: dict) -> bool:
         else:
             logger.debug(f"Skipped pokemon id={row['id']} (already exists)")
 
+        return inserted
+
     except Exception:
         conn.execute("ROLLBACK")
         raise
